@@ -6,7 +6,6 @@ import java.util.Set;
 
 public class User extends GenericEntity {
 	
-//	private String username;
     private String email;
     private String password;
     private String first_name;
@@ -23,12 +22,6 @@ public class User extends GenericEntity {
 	private LocalDateTime modifiedAt;
 	
 	
-//	public String getUsername() {
-//		return username;
-//	}
-//	public void setUsername(String username) {
-//		this.username = username;
-//	}
 	public String getEmail() {
 		return email;
 	}
