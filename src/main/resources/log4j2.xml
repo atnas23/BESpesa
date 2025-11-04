@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Properties>
+    <!-- Percorso relativo: "log/app.log" dentro la cartella del progetto -->
+    <Property name="log.path">log/app.log</Property>
+    <!-- Formato dei messaggi di log -->
+    <Property name="log.pattern">%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Property>
+  </Properties>
+
+  <Appenders>
+    <!-- Log su console -->
+	<!-- <Console name="ConsoleAppender" target="SYSTEM_OUT"> <PatternLayout 
+		pattern="${log.pattern}" /> </Console> -->
+
+    <!-- Log su file -->
+    <File name="FileAppender" fileName="${log.path}">
+      <PatternLayout pattern="${log.pattern}" />
+    </File>
+  </Appenders>
+
+  <Loggers>
+    <!-- Logger di root -->
+    <Root level="info">
+	<!-- <AppenderRef ref="ConsoleAppender" /> -->
+      <AppenderRef ref="FileAppender" />
+    </Root>
+  </Loggers>
+</Configuration>
