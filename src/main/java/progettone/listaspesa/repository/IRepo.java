@@ -1,4 +1,4 @@
-package progettone.listaspesa.interfaces;
+package progettone.listaspesa.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +9,7 @@ public interface IRepo<T extends GenericEntity> {
 
 	public List<T> findAll();
 
-	public Optional<T> findById(int id);
+	public Optional<T> findById(Long id);
 
 	public void save(T param);
 

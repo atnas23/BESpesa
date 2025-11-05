@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import progettone.listaspesa.entities.User;
-import progettone.listaspesa.interfaces.IRepo;
 
 public class UserRAMRepository extends BaseRepository implements IRepo<User> {
 
@@ -26,7 +25,7 @@ public class UserRAMRepository extends BaseRepository implements IRepo<User> {
 
 
 	@Override
-	public Optional<User> findById(int id) {
+	public Optional<User> findById(Long id) {
 		for (User u : this.users) {
 			if (u.getId() == id) {
 				return Optional.of(u);

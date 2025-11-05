@@ -11,13 +11,13 @@ import java.util.Optional;
 
 import progettone.listaspesa.entities.User;
 import progettone.listaspesa.exception.DatabaseException;
-import progettone.listaspesa.interfaces.IRepo;
 
 public class UserDBRepository extends BaseRepository implements IRepo<User> {
 
 	private static final UserDBRepository INSTANCE = new UserDBRepository();
 
-	private UserDBRepository() {}
+	private UserDBRepository() {
+	}
 
 	public static UserDBRepository getInstance() {
 		return INSTANCE;
@@ -88,7 +88,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 	}
 
 	@Override
-	public Optional<User> findById(int id) {
+	public Optional<User> findById(Long id) {
 
 		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, created_at, "
 				+ "created_by, modified_at, modified_by FROM user WHERE id = ?";
@@ -97,7 +97,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 
 			PreparedStatement pstm = conn.prepareStatement(sql);
 
-			pstm.setInt(1, id);
+			pstm.setLong(1, id);
 
 			ResultSet rs = pstm.executeQuery();
 
@@ -118,15 +118,18 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 	@Override
 	public void save(User user) {
 
-		String sql = "INSERT INTO user (password, email, first_name, last_name, date_of_birth, "
-				+ "created_at, created_by, deleted) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = """
+				INSERT INTO user 
+				(password, email, first_name, last_name, date_of_birth, created_at, created_by, deleted)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+				""";
 
 		try (Connection conn = openConnection()) {
-			
+
 			PreparedStatement pstm = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-			
+
 			conn.setAutoCommit(false);
-			
+
 			int i = 1;
 			pstm.setString(i++, user.getPassword());
 			pstm.setString(i++, user.getEmail());
@@ -149,7 +152,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 			}
 
 			conn.commit();
-			
+
 		} catch (SQLException e) {
 			throw new DatabaseException("Errore durante il salvataggio dell'utente", e);
 		}
