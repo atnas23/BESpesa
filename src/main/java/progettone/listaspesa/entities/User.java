@@ -1,18 +1,21 @@
 package progettone.listaspesa.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User extends GenericEntity {
 	
     private String email;
     private String password;
-    private String first_name;
-    private String last_name;
-    private LocalDateTime date_of_birth;
-    private Set<Group> groups = new HashSet<>();
-    private Set<Role> roles = new HashSet<>();
+    private String firstName;
+    private String lastName;
+    private LocalDate dateOfBirth;
+    private boolean deleted;
+
+	private List<Group> groups = new ArrayList<>();
+	private List<Role> roles = new ArrayList<>();
 	
 	
 	private String createdBy;
@@ -34,36 +37,46 @@ public class User extends GenericEntity {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public String getFirst_name() {
-		return first_name;
+	public String getFirstName() {
+		return firstName;
 	}
-	public void setFirst_name(String first_name) {
-		this.first_name = first_name;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
-	public String getLast_name() {
-		return last_name;
+	public String getLastName() {
+		return lastName;
 	}
-	public void setLast_name(String last_name) {
-		this.last_name = last_name;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
-	public LocalDateTime getDate_of_birth() {
-		return date_of_birth;
+	public LocalDate getDateOfBirth() {
+		return dateOfBirth;
 	}
-	public void setDate_of_birth(LocalDateTime date_of_birth) {
-		this.date_of_birth = date_of_birth;
+	public void setDateOfBirth(LocalDate dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
 	}
-	public Set<Group> getGroups() {
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+
+	public List<Group> getGroups() {
 		return groups;
 	}
-	public void setGroups(Set<Group> groups) {
+	public void setGroups(List<Group> groups) {
 		this.groups = groups;
 	}
-	public Set<Role> getRoles() {
+	public List<Role> getRoles() {
 		return roles;
 	}
-	public void setRoles(Set<Role> roles) {
+	public void setRoles(List<Role> roles) {
 		this.roles = roles;
 	}
+
 	public String getCreatedBy() {
 		return createdBy;
 	}

@@ -2,32 +2,28 @@ package progettone.listaspesa.repository;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import progettone.listaspesa.entities.Group;
 import progettone.listaspesa.entities.User;
 import progettone.listaspesa.interfaces.IRepo;
 
-public class UserRepository implements IRepo<User> {
+public class UserRAMRepository extends BaseRepository implements IRepo<User> {
 
-	private static final UserRepository INSTANCE = new UserRepository();
+	private static final UserRAMRepository INSTANCE = new UserRAMRepository();
 
 	private Set<User> users = new HashSet<>();
 	private static int SEQ_ID = 1;
 
-	private UserRepository() {
+	private UserRAMRepository() {
 
 	}
 
-	public static UserRepository getInstance() {
+	public static UserRAMRepository getInstance() {
 		return INSTANCE;
 	}
 
-	@Override
-	public Set<User> findAll() {
-		return users;
-	}
 
 	@Override
 	public Optional<User> findById(int id) {
@@ -63,16 +59,6 @@ public class UserRepository implements IRepo<User> {
 
 	}
 
-	@Override
-	public void delete(int id) {
-
-		for (User u : this.users) {
-			if (u.getId() == id) {
-				this.users.remove(u);
-			}
-		}
-
-	}
 
 	@Override
 	public void delete(User user) {
@@ -84,6 +70,12 @@ public class UserRepository implements IRepo<User> {
 			}
 		}
 
+	}
+
+	@Override
+	public List<User> findAll() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
