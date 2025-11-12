@@ -9,16 +9,15 @@ public abstract class GenericEntity {
 	private LocalDateTime createdAt;
 	private Long modifiedBy;
 	private LocalDateTime modifiedAt;
+	private boolean deleted;
 	
 
 	public long getId() {
 		return id;
 	}
-
 	public void setId(long id) {
 		this.id = id;
 	}
-	
 	public Long getCreatedBy() {
 		return createdBy;
 	}
@@ -43,7 +42,12 @@ public abstract class GenericEntity {
 	public void setModifiedAt(LocalDateTime modifiedAt) {
 		this.modifiedAt = modifiedAt;
 	}
-	
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
 	
 
 }

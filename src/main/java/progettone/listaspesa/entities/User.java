@@ -12,7 +12,6 @@ public class User extends GenericEntity {
 	private String firstName;
 	private String lastName;
 	private LocalDate dateOfBirth;
-	private boolean deleted;
 
 	private List<Group> groups = new ArrayList<>();
 	private List<Role> roles = new ArrayList<>();
@@ -55,14 +54,6 @@ public class User extends GenericEntity {
 
 	public void setDateOfBirth(LocalDate dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
-	}
-
-	public boolean isDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
 	}
 
 	public List<Group> getGroups() {
