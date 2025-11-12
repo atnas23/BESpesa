@@ -25,7 +25,7 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 
 	private User mapRowToUser(ResultSet rs) throws SQLException {
 		User user = new User();
-		user.setId(rs.getInt("id"));
+		user.setId(rs.getLong("id"));
 		user.setPassword(rs.getString("password"));
 		user.setEmail(rs.getString("email"));
 		user.setFirstName(rs.getString("first_name"));
@@ -40,16 +40,17 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 		return user;
 	}
 
-	// restituisce tutti gli utenti nel db
 	@Override
 	public List<User> findAll() {
 		List<User> users = new ArrayList<>();
 
-		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, "
-				+ "created_at, created_by, modified_at, modified_by, deleted FROM user";
+		String sql = """
+				SELECT id, password, email, first_name, last_name, date_of_birth,
+				       created_at, created_by, modified_at, modified_by, deleted
+				FROM users
+				""";
 
 		try (Connection conn = openConnection()) {
-
 			PreparedStatement pstm = conn.prepareStatement(sql);
 			ResultSet rs = pstm.executeQuery();
 
@@ -64,15 +65,17 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 		return users;
 	}
 
-	// restituisce tutti gli utenti non cancellati nel db
 	public List<User> findAllActive() {
 		List<User> users = new ArrayList<>();
 
-		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, "
-				+ "created_at, created_by, modified_at, modified_by, deleted FROM user WHERE deleted = false";
+		String sql = """
+				SELECT id, password, email, first_name, last_name, date_of_birth,
+				       created_at, created_by, modified_at, modified_by, deleted
+				FROM users
+				WHERE deleted = false
+				""";
 
 		try (Connection conn = openConnection()) {
-
 			PreparedStatement pstm = conn.prepareStatement(sql);
 			ResultSet rs = pstm.executeQuery();
 
@@ -81,7 +84,7 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			}
 
 		} catch (SQLException e) {
-			throw new DatabaseException("Errore nella ricerca di tutti gli utenti", e);
+			throw new DatabaseException("Errore nella ricerca degli utenti attivi", e);
 		}
 
 		return users;
@@ -89,16 +92,16 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 
 	@Override
 	public Optional<User> findById(Long id) {
-
-		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, created_at, "
-				+ "created_by, modified_at, modified_by, deleted FROM user WHERE id = ?";
+		String sql = """
+				SELECT id, password, email, first_name, last_name, date_of_birth,
+				       created_at, created_by, modified_at, modified_by, deleted
+				FROM users
+				WHERE id = ?
+				""";
 
 		try (Connection conn = openConnection()) {
-
 			PreparedStatement pstm = conn.prepareStatement(sql);
-
 			pstm.setLong(1, id);
-
 			ResultSet rs = pstm.executeQuery();
 
 			if (rs.next()) {
@@ -106,22 +109,22 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			}
 
 		} catch (SQLException e) {
-			throw new DatabaseException("Errore nella ricerca dello user", e);
+			throw new DatabaseException("Errore nella ricerca dello user con ID: " + id, e);
 		}
 		return Optional.empty();
 	}
 
 	public Optional<User> findByEmail(String email) {
-
-		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, created_at, "
-				+ "created_by, modified_at, modified_by, deleted FROM user WHERE email = ?";
+		String sql = """
+				SELECT id, password, email, first_name, last_name, date_of_birth,
+				       created_at, created_by, modified_at, modified_by, deleted
+				FROM users
+				WHERE email = ?
+				""";
 
 		try (Connection conn = openConnection()) {
-
 			PreparedStatement pstm = conn.prepareStatement(sql);
-
 			pstm.setString(1, email);
-
 			ResultSet rs = pstm.executeQuery();
 
 			if (rs.next()) {
@@ -129,26 +132,23 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			}
 
 		} catch (SQLException e) {
-			throw new DatabaseException("Errore nella ricerca dello user", e);
+			throw new DatabaseException("Errore nella ricerca dello user per email", e);
 		}
 		return Optional.empty();
 	}
 
 	@Override
 	public void save(User user) {
-
 		String sql = """
-				INSERT INTO user 
+				INSERT INTO users
 				(password, email, first_name, last_name, date_of_birth, created_at, created_by, deleted)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 				""";
 
 		try (Connection conn = openConnection()) {
-
-			PreparedStatement pstm = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-
 			conn.setAutoCommit(false);
 
+			PreparedStatement pstm = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
 			int i = 1;
 			pstm.setString(i++, user.getPassword());
 			pstm.setString(i++, user.getEmail());
@@ -157,10 +157,9 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			pstm.setDate(i++, user.getDateOfBirth() != null ? java.sql.Date.valueOf(user.getDateOfBirth()) : null);
 			pstm.setTimestamp(i++, java.sql.Timestamp.valueOf(user.getCreatedAt()));
 			pstm.setLong(i++, user.getCreatedBy());
-			pstm.setBoolean(i++, false); // nuovo utente → deleted = false
+			pstm.setBoolean(i++, false);
 
 			int rows = pstm.executeUpdate();
-
 			if (rows == 0) {
 				throw new DatabaseException("Creazione utente fallita, nessuna riga inserita.");
 			}
@@ -179,26 +178,23 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 
 	@Override
 	public void update(User user) {
-
 		String sql = """
-				    UPDATE user SET
-				        password = ?,
-				        email = ?,
-				        first_name = ?,
-				        last_name = ?,
-				        date_of_birth = ?,
-				        modified_at = ?,
-				        modified_by = ?,
-				        deleted = ?
-				    WHERE id = ? AND deleted = false
+				UPDATE users SET
+				    password = ?,
+				    email = ?,
+				    first_name = ?,
+				    last_name = ?,
+				    date_of_birth = ?,
+				    modified_at = ?,
+				    modified_by = ?,
+				    deleted = ?
+				WHERE id = ? AND deleted = false
 				""";
 
 		try (Connection conn = openConnection()) {
-
 			conn.setAutoCommit(false);
 
 			PreparedStatement pstm = conn.prepareStatement(sql);
-
 			int i = 1;
 			pstm.setString(i++, user.getPassword());
 			pstm.setString(i++, user.getEmail());
@@ -221,14 +217,12 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 
 	@Override
 	public void delete(User user) {
-		String sql = "UPDATE user SET deleted = true, modified_at = ?, modified_by = ? WHERE id = ?";
+		String sql = "UPDATE users SET deleted = true, modified_at = ?, modified_by = ? WHERE id = ?";
 
 		try (Connection conn = openConnection()) {
-
 			conn.setAutoCommit(false);
 
 			PreparedStatement pstm = conn.prepareStatement(sql);
-
 			pstm.setTimestamp(1, java.sql.Timestamp.valueOf(LocalDateTime.now()));
 			pstm.setLong(2, user.getModifiedBy());
 			pstm.setLong(3, user.getId());
@@ -241,5 +235,4 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			throw new DatabaseException("Errore durante la soft delete dell'utente con ID: " + user.getId(), e);
 		}
 	}
-
 }
