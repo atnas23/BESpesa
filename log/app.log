@@ -1,3 +1,30 @@
-2025-10-30 11:34:15 [main] INFO  progettone.listaspesa.logging.test.MainAppSpesa - Applicazione avviata
-2025-10-30 11:34:15 [main] WARN  progettone.listaspesa.logging.test.MainAppSpesa - Questo è un warning
-2025-10-30 11:34:15 [main] ERROR progettone.listaspesa.logging.test.MainAppSpesa - Questo è un messaggio di errore
+2025-11-10 23:26:08 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente laura.romano@example.com
+2025-11-10 23:26:34 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente anna.esposito@example.com
+2025-11-10 23:26:43 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente marco.rossi@example.com
+2025-11-10 23:27:04 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente laura.esposito@example.com
+2025-11-10 23:36:32 [main] ERROR progettone.listaspesa.service.UserService - Errore nel salvataggio utente mario.esposito@example.com
+2025-11-10 23:37:10 [main] ERROR progettone.listaspesa.service.UserService - Errore nel salvataggio utente giulia.verdi@example.com
+2025-11-10 23:45:31 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente giulia.verdi@example.com
+2025-11-10 23:45:46 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente sara.rossi@example.com
+2025-11-10 23:46:35 [main] INFO  progettone.listaspesa.service.UserService - Errore nel mapping DTO → Entity per utente giulia.neri@example.com
+2025-11-10 23:47:40 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: sara.neri@example.com
+2025-11-10 23:47:40 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: luigi.colombo@example.com
+2025-11-10 23:49:01 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: anna.galli@example.com
+2025-11-10 23:49:20 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: anna.romano@example.com
+2025-11-10 23:50:17 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: mario.neri@example.com
+2025-11-10 23:50:17 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: marco.bianchi@example.com
+2025-11-10 23:52:47 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: giulia.esposito@example.com
+2025-11-10 23:52:47 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: giulia.romano@example.com
+2025-11-10 23:56:27 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: luigi.galli@example.com
+2025-11-10 23:56:28 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: giulia.esposito@example.com
+2025-11-10 23:56:54 [main] ERROR progettone.listaspesa.service.UserService - Tentativo di registrazione con DTO nullo
+2025-11-10 23:56:54 [main] WARN  progettone.listaspesa.service.UserService - Tentativo di registrazione con email non valida: null
+2025-11-10 23:57:05 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: luigi.verdi@example.com
+2025-11-10 23:57:14 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: davide.verdi@example.com
+2025-11-10 23:57:14 [main] INFO  progettone.listaspesa.service.UserService - Utente ID=4 soft deleted
+2025-11-10 23:57:24 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: anna.verdi@example.com
+2025-11-10 23:57:24 [main] ERROR progettone.listaspesa.service.UserService - Errore aggiornando utente anna.verdi@example.com
+2025-11-10 23:58:36 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: sara.neri@example.com
+2025-11-10 23:58:36 [main] INFO  progettone.listaspesa.service.UserService - Utente aggiornato: sara.neri@example.com
+2025-11-11 00:00:04 [main] INFO  progettone.listaspesa.service.UserService - Utente registrato con successo: mario.neri@example.com
+2025-11-11 00:00:05 [main] INFO  progettone.listaspesa.service.UserService - Utente aggiornato: mario.neri@example.com

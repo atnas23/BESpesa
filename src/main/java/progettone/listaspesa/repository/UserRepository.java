@@ -12,14 +12,14 @@ import java.util.Optional;
 import progettone.listaspesa.entities.User;
 import progettone.listaspesa.exception.DatabaseException;
 
-public class UserDBRepository extends BaseRepository implements IRepo<User> {
+public class UserRepository extends BaseRepository implements IRepo<User> {
 
-	private static final UserDBRepository INSTANCE = new UserDBRepository();
+	private static final UserRepository INSTANCE = new UserRepository();
 
-	private UserDBRepository() {
+	private UserRepository() {
 	}
 
-	public static UserDBRepository getInstance() {
+	public static UserRepository getInstance() {
 		return INSTANCE;
 	}
 
@@ -32,10 +32,10 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 		user.setLastName(rs.getString("last_name"));
 		user.setDateOfBirth(rs.getDate("date_of_birth") != null ? rs.getDate("date_of_birth").toLocalDate() : null);
 		user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-		user.setCreatedBy(rs.getString("created_by"));
+		user.setCreatedBy(rs.getLong("created_by"));
 		user.setModifiedAt(
 				rs.getTimestamp("modified_at") != null ? rs.getTimestamp("modified_at").toLocalDateTime() : null);
-		user.setModifiedBy(rs.getString("modified_by"));
+		user.setModifiedBy(rs.getLong("modified_by"));
 		user.setDeleted(rs.getBoolean("deleted"));
 		return user;
 	}
@@ -46,7 +46,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 		List<User> users = new ArrayList<>();
 
 		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, "
-				+ "created_at, created_by, modified_at, modified_by FROM user";
+				+ "created_at, created_by, modified_at, modified_by, deleted FROM user";
 
 		try (Connection conn = openConnection()) {
 
@@ -69,7 +69,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 		List<User> users = new ArrayList<>();
 
 		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, "
-				+ "created_at, created_by, modified_at, modified_by FROM user WHERE deleted = false";
+				+ "created_at, created_by, modified_at, modified_by, deleted FROM user WHERE deleted = false";
 
 		try (Connection conn = openConnection()) {
 
@@ -91,7 +91,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 	public Optional<User> findById(Long id) {
 
 		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, created_at, "
-				+ "created_by, modified_at, modified_by FROM user WHERE id = ?";
+				+ "created_by, modified_at, modified_by, deleted FROM user WHERE id = ?";
 
 		try (Connection conn = openConnection()) {
 
@@ -111,9 +111,28 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 		return Optional.empty();
 	}
 
-// 	TODO: da spostare nel service
-//	user.setCreatedAt(LocalDateTime.now());
-//	user.setCreatedBy("admin");
+	public Optional<User> findByEmail(String email) {
+
+		String sql = "SELECT id, password, email, first_name, last_name, date_of_birth, created_at, "
+				+ "created_by, modified_at, modified_by, deleted FROM user WHERE email = ?";
+
+		try (Connection conn = openConnection()) {
+
+			PreparedStatement pstm = conn.prepareStatement(sql);
+
+			pstm.setString(1, email);
+
+			ResultSet rs = pstm.executeQuery();
+
+			if (rs.next()) {
+				return Optional.of(mapRowToUser(rs));
+			}
+
+		} catch (SQLException e) {
+			throw new DatabaseException("Errore nella ricerca dello user", e);
+		}
+		return Optional.empty();
+	}
 
 	@Override
 	public void save(User user) {
@@ -137,7 +156,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 			pstm.setString(i++, user.getLastName());
 			pstm.setDate(i++, user.getDateOfBirth() != null ? java.sql.Date.valueOf(user.getDateOfBirth()) : null);
 			pstm.setTimestamp(i++, java.sql.Timestamp.valueOf(user.getCreatedAt()));
-			pstm.setString(i++, user.getCreatedBy());
+			pstm.setLong(i++, user.getCreatedBy());
 			pstm.setBoolean(i++, false); // nuovo utente → deleted = false
 
 			int rows = pstm.executeUpdate();
@@ -169,7 +188,8 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 				        last_name = ?,
 				        date_of_birth = ?,
 				        modified_at = ?,
-				        modified_by = ?
+				        modified_by = ?,
+				        deleted = ?
 				    WHERE id = ? AND deleted = false
 				""";
 
@@ -186,7 +206,8 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 			pstm.setString(i++, user.getLastName());
 			pstm.setDate(i++, user.getDateOfBirth() != null ? java.sql.Date.valueOf(user.getDateOfBirth()) : null);
 			pstm.setTimestamp(i++, java.sql.Timestamp.valueOf(LocalDateTime.now()));
-			pstm.setString(i++, user.getModifiedBy());
+			pstm.setLong(i++, user.getModifiedBy());
+			pstm.setBoolean(i++, user.isDeleted());
 			pstm.setLong(i++, user.getId());
 
 			pstm.executeUpdate();
@@ -209,7 +230,7 @@ public class UserDBRepository extends BaseRepository implements IRepo<User> {
 			PreparedStatement pstm = conn.prepareStatement(sql);
 
 			pstm.setTimestamp(1, java.sql.Timestamp.valueOf(LocalDateTime.now()));
-			pstm.setString(2, user.getModifiedBy());
+			pstm.setLong(2, user.getModifiedBy());
 			pstm.setLong(3, user.getId());
 
 			pstm.executeUpdate();
