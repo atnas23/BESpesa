@@ -9,7 +9,7 @@ import progettone.listaspesa.entities.Role;
 
 public class UserDTO {
 
-//	private Long id;
+	private Long id;
 	private String password;
     private String email;
     private String firstName;
@@ -21,12 +21,12 @@ public class UserDTO {
 	private List<Role> roles = new ArrayList<>();
 	
 	
-//	public Long getId() {
-//		return id;
-//	}
-//	public void setId(Long id) {
-//		this.id = id;
-//	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getPassword() {
 		return password;
 	}

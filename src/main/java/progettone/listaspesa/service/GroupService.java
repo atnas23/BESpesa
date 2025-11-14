@@ -13,7 +13,7 @@ import progettone.listaspesa.entities.Group;
 import progettone.listaspesa.entities.User;
 import progettone.listaspesa.repository.GroupRepository;
 
-public class GroupService extends BaseService {
+public class GroupService {
 
 	private static final GroupService INSTANCE = new GroupService();
 	private static final Logger logger = LogManager.getLogger(GroupService.class);
@@ -26,14 +26,14 @@ public class GroupService extends BaseService {
 		return INSTANCE;
 	}
 
-	/**
-	 * Registra un nuovo gruppo
-	 */
-	public Group register(GroupDTO dto, User currentUser) {
-
+	public GroupDTO register(GroupDTO dto, User currentUser) {
 		if (dto == null) {
 			logger.error("Tentativo di registrazione gruppo con DTO nullo");
 			throw new IllegalArgumentException("GroupDTO nullo");
+		}
+		if (currentUser == null) {
+			logger.error("Tentativo di registrazione gruppo con currentUser nullo");
+			throw new IllegalArgumentException("currentUser nullo");
 		}
 
 		if (dto.getName() == null || dto.getName().isBlank()) {
@@ -42,15 +42,11 @@ public class GroupService extends BaseService {
 		}
 
 		Group entity = new Group();
-		try {
-			reflectionMapper(entity, dto);
-		} catch (Exception e) {
-			logger.error("Errore nel mapping DTO → Entity per gruppo {}", dto.getName(), e);
-			throw new RuntimeException("Errore interno nel mapping gruppo", e);
-		}
-
+		entity.setName(dto.getName());
+		entity.setDescription(dto.getDescription());
 		entity.setCreatedAt(LocalDateTime.now());
 		entity.setCreatedBy(currentUser != null ? currentUser.getId() : 0L);
+		entity.setDeleted(false);
 
 		try {
 			groupRepo.save(entity);
@@ -60,66 +56,60 @@ public class GroupService extends BaseService {
 			throw new RuntimeException("Errore durante il salvataggio del gruppo", e);
 		}
 
-		return entity;
+		dto.setId(entity.getId());
+		
+		return groupToDTO(entity);
+
 	}
 
-	/**
-	 * Trova un gruppo per ID
-	 */
-	public GroupDTO findById(Long id) {
+	public Optional<GroupDTO> findById(Long id) {
 		if (id == null || id <= 0) {
 			throw new IllegalArgumentException("ID non valido");
 		}
 
-		Optional<Group> opt = groupRepo.findById(id);
-		if (opt.isEmpty()) {
+		Optional<Group> group = groupRepo.findById(id);
+		if (group.isEmpty()) {
 			logger.warn("Nessun gruppo trovato con ID {}", id);
-			return null;
+			return Optional.empty();
 		}
 
-		GroupDTO dto = new GroupDTO();
-		reflectionMapper(dto, opt.get());
-		return dto;
+		return groupRepo.findById(id)
+                .map(this::groupToDTO);
 	}
 
-	/**
-	 * Restituisce tutti i gruppi
-	 */
+
 	public List<GroupDTO> findAll() {
 		List<Group> groups = groupRepo.findAll();
 		List<GroupDTO> result = new ArrayList<>();
 		for (Group g : groups) {
-			GroupDTO dto = new GroupDTO();
-			reflectionMapper(dto, g);
-			result.add(dto);
+			result.add(groupToDTO(g));
 		}
 		return result;
 	}
 
-	/**
-	 * Restituisce tutti i gruppi attivi (non cancellati)
-	 */
+
 	public List<GroupDTO> findAllActive() {
 		List<Group> groups = groupRepo.findAllActive();
 		List<GroupDTO> result = new ArrayList<>();
 		for (Group g : groups) {
 			if (!g.isDeleted()) {
-				GroupDTO dto = new GroupDTO();
-				reflectionMapper(dto, g);
-				result.add(dto);
+				result.add(groupToDTO(g));
 			}
 		}
 		return result;
 	}
 
-	/**
-	 * Aggiorna i dati di un gruppo esistente
-	 */
+
 	public Group update(GroupDTO dto, User currentUser) {
 		if (dto == null) {
 			throw new IllegalArgumentException("GroupDTO nullo");
 		}
 
+		if (currentUser == null) {
+			logger.error("Tentativo di aggiornamento gruppo con currentUser nullo");
+			throw new IllegalArgumentException("currentUser nullo");
+		}
+		
 		if (dto.getId() == null) {
 			logger.warn("Tentativo di aggiornamento gruppo senza ID valido");
 			throw new IllegalArgumentException("ID gruppo non valido");
@@ -132,10 +122,15 @@ public class GroupService extends BaseService {
 		}
 
 		Group existing = existingOpt.get();
-		reflectionMapper(existing, dto);
 
+		if (existing.isDeleted()) {
+			throw new IllegalStateException("Impossibile aggiornare un gruppo eliminato");
+		}
+		
+		existing.setName(dto.getName());
+		existing.setDescription(dto.getDescription());
 		existing.setModifiedAt(LocalDateTime.now());
-		existing.setModifiedBy(currentUser != null ? currentUser.getId() : 0L);
+		existing.setModifiedBy(currentUser.getId());
 
 		try {
 			groupRepo.update(existing);
@@ -148,14 +143,16 @@ public class GroupService extends BaseService {
 		return existing;
 	}
 
-	/**
-	 * Esegue una soft delete su un gruppo
-	 */
 	public boolean delete(Long id, User currentUser) {
 		if (id == null || id <= 0) {
 			throw new IllegalArgumentException("ID non valido");
 		}
 
+		if (currentUser == null) {
+			logger.error("Tentativo di registrazione gruppo con currentUser nullo");
+			throw new IllegalArgumentException("currentUser nullo");
+		}
+		
 		Optional<Group> existingOpt = groupRepo.findById(id);
 		if (existingOpt.isEmpty()) {
 			logger.warn("Tentativo di cancellare gruppo non esistente ID={}", id);
@@ -164,7 +161,8 @@ public class GroupService extends BaseService {
 
 		Group existing = existingOpt.get();
 		existing.setModifiedAt(LocalDateTime.now());
-		existing.setModifiedBy(currentUser != null ? currentUser.getId() : 0L);
+		existing.setModifiedBy(currentUser.getId());
+		existing.setDeleted(true);
 
 		try {
 			groupRepo.delete(existing);
@@ -175,4 +173,19 @@ public class GroupService extends BaseService {
 			throw new RuntimeException("Errore nella cancellazione del gruppo", e);
 		}
 	}
+
+	/*
+	 * ================================================================
+	 * METODI PRIVATI DI MAPPING
+	 * ================================================================
+	 */
+
+	private GroupDTO groupToDTO(Group g) {
+		GroupDTO dto = new GroupDTO();
+		dto.setId(g.getId());
+		dto.setName(g.getName());
+		dto.setDescription(g.getDescription());
+		return dto;
+	}
+	
 }

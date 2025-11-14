@@ -41,8 +41,6 @@ public class ExternalGroup {
 		dto.setName(name);
 		dto.setDescription(description);
 
-		dto.setDeleted(false);
-
 		return dto;
 	}
 
@@ -54,7 +52,6 @@ public class ExternalGroup {
 		GroupDTO dto = new GroupDTO();
 		dto.setName(name != null ? name : "Gruppo Generico");
 		dto.setDescription(description != null ? description : "Descrizione non fornita");
-		dto.setDeleted(false);
 		return dto;
 	}
 

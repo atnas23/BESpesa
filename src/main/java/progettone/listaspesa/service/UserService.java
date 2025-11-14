@@ -12,7 +12,7 @@ import progettone.listaspesa.dto.UserDTO;
 import progettone.listaspesa.entities.User;
 import progettone.listaspesa.repository.UserRepository;
 
-public class UserService extends BaseService {
+public class UserService {
 
 	private static final UserService INSTANCE = new UserService();
 	private static final Logger logger = LogManager.getLogger(UserService.class);
@@ -25,8 +25,10 @@ public class UserService extends BaseService {
 		return INSTANCE;
 	}
 
+	/**
+	 * Registra un nuovo utente
+	 */
 	public User register(UserDTO dto, User currentUser) {
-
 		if (dto == null) {
 			logger.error("Tentativo di registrazione con DTO nullo");
 			throw new IllegalArgumentException("UserDTO nullo");
@@ -38,29 +40,29 @@ public class UserService extends BaseService {
 		}
 
 		User entity = new User();
-		try {
-			reflectionMapper(entity, dto);
-		} catch (Exception e) {
-			logger.info("Errore nel mapping DTO → Entity per utente {}", dto.getEmail(), e.getMessage());
-			throw new RuntimeException("Errore interno nel mapping utente", e);
-		}
-
-		// valorizza i metadati tecnici
+		entity.setEmail(dto.getEmail());
+		entity.setPassword(dto.getPassword());
+		entity.setFirstName(dto.getFirstName());
+		entity.setLastName(dto.getLastName());
+		entity.setDateOfBirth(dto.getDateOfBirth());
 		entity.setCreatedAt(LocalDateTime.now());
 		entity.setCreatedBy(currentUser != null ? currentUser.getId() : 0L);
+		entity.setDeleted(false);
 
 		try {
 			userRepo.save(entity);
 			logger.info("Utente registrato con successo: {}", entity.getEmail());
 		} catch (Exception e) {
-			logger.error("Errore nel salvataggio utente {}", entity.getEmail(), e.getMessage());
+			logger.error("Errore nel salvataggio utente {}", entity.getEmail(), e);
 			throw new RuntimeException("Errore durante il salvataggio dell’utente", e);
 		}
 
 		return entity;
-
 	}
 
+	/**
+	 * Trova un utente per ID
+	 */
 	public UserDTO findById(Long id) {
 		if (id == null || id <= 0) {
 			throw new IllegalArgumentException("ID non valido");
@@ -72,35 +74,38 @@ public class UserService extends BaseService {
 			return null;
 		}
 
-		UserDTO dto = new UserDTO();
-		reflectionMapper(dto, opt.get());
-		return dto;
+		return mapToDTO(opt.get());
 	}
 
+	/**
+	 * Restituisce tutti gli utenti
+	 */
 	public List<UserDTO> findAll() {
 		List<User> users = userRepo.findAll();
 		List<UserDTO> result = new ArrayList<>();
 		for (User u : users) {
-			UserDTO dto = new UserDTO();
-			reflectionMapper(dto, u);
-			result.add(dto);
+			result.add(mapToDTO(u));
 		}
 		return result;
 	}
 
+	/**
+	 * Restituisce tutti gli utenti attivi (non cancellati)
+	 */
 	public List<UserDTO> findAllActive() {
 		List<User> users = userRepo.findAllActive();
 		List<UserDTO> result = new ArrayList<>();
 		for (User u : users) {
 			if (!u.isDeleted()) {
-				UserDTO dto = new UserDTO();
-				reflectionMapper(dto, u);
-				result.add(dto);
+				result.add(mapToDTO(u));
 			}
 		}
 		return result;
 	}
 
+	/**
+	 * Aggiorna un utente esistente
+	 */
 	public User update(UserDTO dto, User currentUser) {
 		if (dto == null) {
 			throw new IllegalArgumentException("UserDTO nullo");
@@ -113,22 +118,29 @@ public class UserService extends BaseService {
 		}
 
 		User existing = existingOpt.get();
-		reflectionMapper(existing, dto);
-
+		existing.setPassword(dto.getPassword());
+		existing.setEmail(dto.getEmail());
+		existing.setFirstName(dto.getFirstName());
+		existing.setLastName(dto.getLastName());
+		existing.setDateOfBirth(dto.getDateOfBirth());
 		existing.setModifiedAt(LocalDateTime.now());
 		existing.setModifiedBy(currentUser != null ? currentUser.getId() : 0L);
+		existing.setDeleted(dto.isDeleted());
 
 		try {
 			userRepo.update(existing);
 			logger.info("Utente aggiornato: {}", existing.getEmail());
 		} catch (Exception e) {
-			logger.error("Errore aggiornando utente {}", existing.getEmail(), e.getMessage());
+			logger.error("Errore aggiornando utente {}", existing.getEmail(), e);
 			throw new RuntimeException("Errore aggiornando utente", e);
 		}
 
 		return existing;
 	}
 
+	/**
+	 * Soft delete (cancellazione logica)
+	 */
 	public boolean delete(Long id, User currentUser) {
 		if (id == null || id <= 0) {
 			throw new IllegalArgumentException("ID non valido");
@@ -149,9 +161,26 @@ public class UserService extends BaseService {
 			logger.info("Utente ID={} soft deleted", id);
 			return true;
 		} catch (Exception e) {
-			logger.error("Errore nella soft delete dell’utente ID={}", id, e.getMessage());
+			logger.error("Errore nella soft delete dell’utente ID={}", id, e);
 			throw new RuntimeException("Errore nella cancellazione", e);
 		}
 	}
 
+	/*
+	 * ================================================================
+	 * METODI PRIVATI DI MAPPING
+	 * ================================================================
+	 */
+
+	private UserDTO mapToDTO(User user) {
+		UserDTO dto = new UserDTO();
+		dto.setId(user.getId());
+		dto.setEmail(user.getEmail());
+		dto.setPassword(user.getPassword());
+		dto.setFirstName(user.getFirstName());
+		dto.setLastName(user.getLastName());
+		dto.setDateOfBirth(user.getDateOfBirth());
+		dto.setDeleted(user.isDeleted());
+		return dto;
+	}
 }
