@@ -73,8 +73,7 @@ public class GroupService {
 			return Optional.empty();
 		}
 
-		return groupRepo.findById(id)
-                .map(this::groupToDTO);
+		return group.map(this::groupToDTO);
 	}
 
 

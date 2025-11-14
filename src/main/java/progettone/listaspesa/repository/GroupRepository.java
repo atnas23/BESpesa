@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -165,7 +166,7 @@ public class GroupRepository extends BaseRepository implements IRepo<Group> {
             int i = 1;
             pstm.setString(i++, group.getName());
             pstm.setString(i++, group.getDescription());
-            pstm.setTimestamp(i++, java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            pstm.setTimestamp(i++, Timestamp.valueOf(group.getModifiedAt()));
             pstm.setLong(i++, group.getModifiedBy());
             pstm.setBoolean(i++, group.isDeleted());
             pstm.setLong(i++, group.getId());
@@ -186,7 +187,7 @@ public class GroupRepository extends BaseRepository implements IRepo<Group> {
             conn.setAutoCommit(false);
 
             PreparedStatement pstm = conn.prepareStatement(sql);
-            pstm.setTimestamp(1, java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            pstm.setTimestamp(1, Timestamp.valueOf(group.getModifiedAt()));
             pstm.setLong(2, group.getModifiedBy());
             pstm.setLong(3, group.getId());
 

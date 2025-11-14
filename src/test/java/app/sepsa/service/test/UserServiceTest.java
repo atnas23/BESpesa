@@ -1,8 +1,12 @@
 package app.sepsa.service.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,14 +35,14 @@ public class UserServiceTest {
 		// simuliamo richiesta esterna (es. da API)
 		UserDTO dto = ExternalUser.randomUser();
 
-		User created = service.register(dto, admin);
+		UserDTO created = service.register(dto, admin);
 
 		assertNotNull(created.getId(), "L'ID dovrebbe essere generato dal DB");
 
-		UserDTO found = service.findById(created.getId());
-		assertNotNull(found, "Utente non trovato dopo la registrazione");
-		assertEquals(dto.getEmail(), found.getEmail());
-		assertEquals(dto.getFullName(), found.getFullName());
+		Optional<UserDTO> found = service.findById(created.getId());
+		assertTrue(found.isPresent(), "Utente non trovato dopo la registrazione");
+		assertEquals(dto.getEmail(), found.get().getEmail());
+		assertEquals(dto.getFullName(), found.get().getFullName());
 	}
 
 	@Test
@@ -46,11 +50,11 @@ public class UserServiceTest {
 		User admin = buildAdmin();
 		UserDTO dto = ExternalUser.randomUser();
 
-		User created = service.register(dto, admin);
+		UserDTO created = service.register(dto, admin);
 
 		// Simuliamo una modifica che arriva da un'altra richiesta esterna
 		UserDTO updatedRequest = new UserDTO();
-//		updatedRequest.setId(created.getId());		
+		updatedRequest.setId(created.getId());		
 		updatedRequest.setEmail(created.getEmail());
 		updatedRequest.setPassword(created.getPassword());
 		updatedRequest.setFirstName("Aggiornato");
@@ -60,8 +64,8 @@ public class UserServiceTest {
 
 		service.update(updatedRequest, admin);
 
-		UserDTO updated = service.findById(created.getId());
-		assertEquals("Aggiornato", updated.getFirstName(), "Il nome non è stato aggiornato correttamente");
+		Optional<UserDTO> updated = service.findById(created.getId());
+		assertEquals("Aggiornato", updated.get().getFirstName(), "Il nome non è stato aggiornato correttamente");
 	}
 
 	@Test
@@ -87,15 +91,15 @@ public class UserServiceTest {
 		User admin = buildAdmin();
 		UserDTO dto = ExternalUser.randomUser();
 
-		User created = service.register(dto, admin);
+		UserDTO created = service.register(dto, admin);
 		assertNotNull(created.getId());
 
 		boolean deleted = service.delete(created.getId(), admin);
 		assertTrue(deleted, "La cancellazione soft dovrebbe restituire true");
 
-		UserDTO found = service.findById(created.getId());
-		assertNotNull(found, "L'utente dovrebbe esistere ma con deleted=true");
-		assertTrue(found.isDeleted(), "L'utente non risulta marcato come cancellato");
+		Optional<UserDTO> found = service.findById(created.getId());
+		assertTrue(found.isPresent(), "Utente non trovato dopo la canellazione");
+		assertTrue(found.get().isDeleted(), "L'utente non risulta marcato come cancellato");
 	}
 
 	@Test

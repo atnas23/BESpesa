@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +167,7 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 
 			ResultSet generatedKeys = pstm.getGeneratedKeys();
 			if (generatedKeys.next()) {
-				user.setId(generatedKeys.getInt(1));
+				user.setId(generatedKeys.getLong(1));
 			}
 
 			conn.commit();
@@ -201,7 +202,7 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			pstm.setString(i++, user.getFirstName());
 			pstm.setString(i++, user.getLastName());
 			pstm.setDate(i++, user.getDateOfBirth() != null ? java.sql.Date.valueOf(user.getDateOfBirth()) : null);
-			pstm.setTimestamp(i++, java.sql.Timestamp.valueOf(LocalDateTime.now()));
+			pstm.setTimestamp(i++, Timestamp.valueOf(user.getModifiedAt()));
 			pstm.setLong(i++, user.getModifiedBy());
 			pstm.setBoolean(i++, user.isDeleted());
 			pstm.setLong(i++, user.getId());
@@ -223,7 +224,7 @@ public class UserRepository extends BaseRepository implements IRepo<User> {
 			conn.setAutoCommit(false);
 
 			PreparedStatement pstm = conn.prepareStatement(sql);
-			pstm.setTimestamp(1, java.sql.Timestamp.valueOf(LocalDateTime.now()));
+			pstm.setTimestamp(1, Timestamp.valueOf(user.getModifiedAt()));
 			pstm.setLong(2, user.getModifiedBy());
 			pstm.setLong(3, user.getId());
 

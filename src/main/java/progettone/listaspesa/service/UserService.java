@@ -25,15 +25,18 @@ public class UserService {
 		return INSTANCE;
 	}
 
-	/**
-	 * Registra un nuovo utente
-	 */
-	public User register(UserDTO dto, User currentUser) {
+
+	public UserDTO register(UserDTO dto, User currentUser) {
 		if (dto == null) {
 			logger.error("Tentativo di registrazione con DTO nullo");
 			throw new IllegalArgumentException("UserDTO nullo");
 		}
-
+		
+		if (currentUser == null) {
+			logger.error("Tentativo di registrazione user con currentUser nullo");
+			throw new IllegalArgumentException("currentUser nullo");
+		}
+		
 		if (dto.getEmail() == null || dto.getEmail().isBlank()) {
 			logger.warn("Tentativo di registrazione con email non valida: {}", dto.getEmail());
 			throw new IllegalArgumentException("Email utente non valida");
@@ -56,14 +59,13 @@ public class UserService {
 			logger.error("Errore nel salvataggio utente {}", entity.getEmail(), e);
 			throw new RuntimeException("Errore durante il salvataggio dell’utente", e);
 		}
-
-		return entity;
+		dto.setId(entity.getId());
+		
+		return userToDTO(entity);
 	}
 
-	/**
-	 * Trova un utente per ID
-	 */
-	public UserDTO findById(Long id) {
+
+	public Optional<UserDTO> findById(Long id) {
 		if (id == null || id <= 0) {
 			throw new IllegalArgumentException("ID non valido");
 		}
@@ -71,53 +73,54 @@ public class UserService {
 		Optional<User> opt = userRepo.findById(id);
 		if (opt.isEmpty()) {
 			logger.warn("Nessun utente trovato con ID {}", id);
-			return null;
+			return Optional.empty();
 		}
 
-		return mapToDTO(opt.get());
+		return opt.map(this::userToDTO);
 	}
 
-	/**
-	 * Restituisce tutti gli utenti
-	 */
+
 	public List<UserDTO> findAll() {
 		List<User> users = userRepo.findAll();
 		List<UserDTO> result = new ArrayList<>();
 		for (User u : users) {
-			result.add(mapToDTO(u));
+			result.add(userToDTO(u));
 		}
 		return result;
 	}
 
-	/**
-	 * Restituisce tutti gli utenti attivi (non cancellati)
-	 */
 	public List<UserDTO> findAllActive() {
 		List<User> users = userRepo.findAllActive();
 		List<UserDTO> result = new ArrayList<>();
 		for (User u : users) {
 			if (!u.isDeleted()) {
-				result.add(mapToDTO(u));
+				result.add(userToDTO(u));
 			}
 		}
 		return result;
 	}
 
-	/**
-	 * Aggiorna un utente esistente
-	 */
+
 	public User update(UserDTO dto, User currentUser) {
 		if (dto == null) {
 			throw new IllegalArgumentException("UserDTO nullo");
 		}
+		
+		if (currentUser == null) {
+			logger.error("Tentativo di aggiornamento user con currentUser nullo");
+			throw new IllegalArgumentException("currentUser nullo");
+		}
 
-		Optional<User> existingOpt = userRepo.findByEmail(dto.getEmail());
+		Optional<User> existingOpt = userRepo.findById(dto.getId());
 		if (existingOpt.isEmpty()) {
-			logger.warn("Utente con Email {} non trovato per update", dto.getEmail());
+			logger.warn("Utente con id {} non trovato per update", dto.getId());
 			throw new IllegalArgumentException("Utente non trovato");
 		}
 
 		User existing = existingOpt.get();
+		if (existing.isDeleted()) {
+			throw new IllegalStateException("Impossibile aggiornare un user eliminato");
+		}
 		existing.setPassword(dto.getPassword());
 		existing.setEmail(dto.getEmail());
 		existing.setFirstName(dto.getFirstName());
@@ -138,9 +141,7 @@ public class UserService {
 		return existing;
 	}
 
-	/**
-	 * Soft delete (cancellazione logica)
-	 */
+
 	public boolean delete(Long id, User currentUser) {
 		if (id == null || id <= 0) {
 			throw new IllegalArgumentException("ID non valido");
@@ -172,7 +173,7 @@ public class UserService {
 	 * ================================================================
 	 */
 
-	private UserDTO mapToDTO(User user) {
+	private UserDTO userToDTO(User user) {
 		UserDTO dto = new UserDTO();
 		dto.setId(user.getId());
 		dto.setEmail(user.getEmail());
